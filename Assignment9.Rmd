@@ -1,0 +1,87 @@
+---
+title: "Assignment 9"
+author: "JF"
+date: "2024-11-04"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+load("/Users/jadenfix/Desktop/Graduate School Materials/Advanced Econometrics 1/cornwell.RData")
+df <- data
+variable.names(df)
+df = df[!is.na(df$crmrte),]
+df = df[!is.na(df$polpc),]
+df = df[!is.na(df$density),]
+df = df[!is.na(df$pctymle),]
+print(head(df))
+```
+A.) I am using polic/capita, density and % young male x1, x2, and x3
+ols1 <- lm(crmrte ~ polpc + density + pctymle, data = df)
+B.)
+```{r}
+ols1 <- lm(crmrte ~ polpc + density, data = df)
+B1 = (ols1$coefficients["polpc"])
+summary(ols1)
+print(B1)
+```
+A 1 unit increase in police per capita is = to a 1.4093786 increase in crime rate holding density constant 
+c.) 
+```{r}
+vcov_ols1 <- vcov(ols1)
+var_x1 <- vcov_ols1["polpc", "polpc"]
+se_x1 <- sqrt(var_x1)
+print(vcov_ols1)
+print(var_x1)
+print(se_x1)
+```
+Variance is 0.03317612
+SE is 0.1821431
+ols1 <- lm(crmrte ~ polpc + density, data = df)
+Part D.)
+```{r}
+s2 <- sum(residuals(ols1)^2) / (nrow(df) - length(coef(ols1)))
+regression1 <- lm(polpc~density, data=df)
+r2 <- summary(regression1)$r.squared
+SST <- sum((df$polpc - mean(df$polpc))^2)
+var_x1_same <- s2 / ((1-r2)*SST)
+se_x1_same <- sqrt(var_x1_same)
+print(var_x1_same)
+print(se_x1_same)
+```
+They are the same: both are: 0.03317612
+E.)
+```{r}
+ols2 <- lm(crmrte ~ polpc + density + pctymle, data = df)
+vcov_ols2 <- vcov(ols2)
+var_x1_ols2 <- vcov_ols2["polpc", "polpc"]
+se_x1_ols2 <- sqrt(var_x1_ols2)
+print(vcov_ols2)
+print(var_x1_ols2)
+print(se_x1_ols2)
+```
+The SE and Variance are slightly lower
+F.)
+```{r}
+s2_withx3 <- sum(residuals(ols2)^2) / (nrow(df) - length(coef(ols2)))
+print(s2_withx3)
+regression123 <- lm(polpc~density+pctymle, data=df)
+r2_x1_with_x2_x3 <- summary(regression123)$r.squared
+print(r2_x1_with_x2_x3)
+#SST stays the same 
+SST <- sum((df$polpc - mean(df$polpc))^2)
+print(SST)
+var_x1_withx3 <- s2_withx3 / ((1-r2_x1_with_x2_x3)*SST)
+se_x1_withx3 <- sqrt(var_x1_withx3)
+print(var_x1_withx3)
+print(se_x1_withx3)
+```
+F explanation: 
+Residual variance decreased, implying pctymle helps capture additional variability in crmrte
+partial R^2 increased by a little which means more variability is explained 
+SST didnt change 
+Variance of B1 decreased so it made the estimate a bit more accurate, while also increasing partial R^2
+This means it helps increase accuracy without increasing multicolinearity, which implies its beneficial to add to the regression 

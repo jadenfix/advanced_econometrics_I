@@ -1,0 +1,84 @@
+---
+title: "Assignment 12"
+author: "Jaden Fix"
+date: "2024-11-18"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+data = read.csv("http://www.stern.nyu.edu/~wgreene/Text/Edition7/TableF4-1.csv")
+print(variable.names(data))
+
+```
+a.) 
+```{r}
+data$AREA <- data$WIDTH * data$HEIGHT
+data$AspectRatio <- data$WIDTH / data$HEIGHT
+ols1 <- lm(log(PRICE) ~ log(AREA) + AspectRatio, data=data)
+ols1summary <- summary(ols1)
+coeffb2 <- ols1summary$coefficients["log(AREA)", "Estimate"]
+print(ols1summary)
+
+```
+The value of r coeffb2 means that a 1% increase in area is associated with a `r round(coeffb2, 2)`% increase in price. A 100% increase in area would lead to a `r round(coeffb2*100, 2)`% increase in price (assuming linearity).
+
+b.) 
+```{r}
+vcov_matrix <- vcov(ols1)
+se_ols1 <- sqrt(diag(vcov_matrix))
+print(se_ols1)
+```
+c.)
+```{r}
+library(sandwich)
+robust_se_ols1 <- sqrt(diag(vcovHC(ols1, type = "HC0")))
+print(robust_se_ols1)
+```
+d.)
+```{r}
+library(clubSandwich)
+library(lmtest)
+
+clusV <- vcovCR(ols1, cluster = data$PICTURE, type = "CR1S")
+clustered_test <- coeftest(ols1, vcov = clusV)
+print(clustered_test)
+```
+
+e.)
+```{r}
+X <- model.matrix(ols1)
+y <- log(data$PRICE)
+residuals <- residuals(ols1)
+
+XTX <- t(X) %*% X
+XTX_inv <- solve(XTX)
+
+# clustered var-covar matrix
+clusters <- unique(data$PICTURE)
+clustered_matrix <- matrix(0, ncol = ncol(X), nrow = ncol(X))
+
+for (cluster in clusters) {
+  cluster_data <- data[data$PICTURE == cluster, ]
+  X_g <- model.matrix(ols1, data = cluster_data)
+  u_g <- residuals[data$PICTURE == cluster]
+  clustered_matrix <- clustered_matrix + t(X_g) %*% (u_g %*% t(u_g)) %*% X_g
+}
+
+# small sample adjustment
+G <- length(clusters)
+n <- nrow(data)
+k <- ncol(X)
+adjustment <- (G / (G - 1)) * ((n - 1) / (n - k))
+
+manual_clustered_var <- adjustment * XTX_inv %*% clustered_matrix %*% XTX_inv
+
+# se's
+manual_clustered_se <- sqrt(diag(manual_clustered_var))
+print(manual_clustered_se)
+```
+
+

@@ -1,0 +1,80 @@
+---
+title: "assignment 13"
+author: "JF"
+date: "2024-11-20"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+a.)
+```{r}
+load("/Users/jadenfix/Desktop/Graduate School Materials/Advanced Econometrics 1/housingvouchers.RData")
+data <- regression_data
+head(data)
+dimdata <- dim(data)
+obervations <- nrow(data)
+print(obervations)
+variablesindata <- ncol(data)
+print(variablesindata)
+
+```
+b.)
+```{r}
+mean_evrod <- mean(data$evrod, na.rm = TRUE)
+mean_evrod
+```
+c.)
+```{r}
+library(fixest)
+fixestreg <- feols(
+  lrent_ut ~ lvouch + linc + ltotpop + lvacancy + evrod + drywash + cracks + ifsew | control + year,
+  cluster = ~smsa,
+  data = data
+)
+summary(fixestreg)
+ltotpop_coeff <- fixestreg$coefficients["ltotpop"]
+ltotpop_se <- fixestreg$se["ltotpop"]
+```
+It's a log log regression so the coeff of `r ltotpop_coeff` means a 1% increase in ltotpop = a `r ltotpop_coeff` increase in lrent_ut
+d.)
+```{r}
+answer_d <- "We do not find that an increase in vouchers affected the overall price of rental housing"
+```
+e.)
+```{r}
+answer_e <- "likely the r squared value, fixest does r squared different for fixed effects models"
+```
+f.)
+```{r}
+library(car)
+
+hypothesis <- c("evrod = 0", "cracks = 0", "ifsew = 0")
+linear_test <- linearHypothesis(fixestreg, hypothesis)
+
+answer_f <- linear_test
+answer_f
+```
+g.)
+
+```{r}
+g_answer <- "The research question is whether an increase in housing vouchers affects rental prices. Regression findings suggest there is no significant effect of vouchers on rental prices. But, we found other characteristics like evidence of rodents, cracks in the wall, and sewage system issues are jointly significant in explaining rent variations at the 5% level.
+Linear regression assumptions: are they satisfied?
+1.)linear yes 
+2.)full rnak of x, yes or the reg would not have converged due to singularities
+3.)mean independence through fixed effects and clustered ses 
+4.)homoskedacity: possibly, we would have to do bp test 
+5.)Normality of dist: possibly, we would have to do shapiro wilk or qq 
+"
+```
+
+
+
+a.) `r observations` & `r variablesindata`
+b.) `r mean_evrod`
+c.) It's a log log regression so the coeff of `r ltotpop_coeff` means a 1% increase in ltotpop = a `r ltotpop_coeff` increase in lrent_ut
+d.) `r answer_d`
+e.) `r answer_e`
+f.) chi^2 is 3.2656 and we will fail to reject the null
+g.)`r g_answer`

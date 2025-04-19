@@ -1,0 +1,792 @@
+---
+title: "Final Notes"
+author: "JF"
+date: "2024-12-10"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+Matrix Operations
+```{r}
+# Define matrices
+A <- matrix(c(2, 4, 1, 3), nrow = 2, byrow = TRUE)
+B <- matrix(c(1, 2, 3, 4), nrow = 2, byrow = TRUE)
+
+# Matrix multiplication
+AB <- A %*% B
+
+# Transpose of a matrix
+A_transpose <- t(A)
+
+# Inverse of a matrix
+A_inv <- solve(A)
+
+# Determinant of a matrix
+A_det <- det(A)
+
+# Eigenvalues and eigenvectors
+eigen_results <- eigen(A)
+eigenvalues <- eigen_results$values
+eigenvectors <- eigen_results$vectors
+```
+Log PDF at x (remove log if normal)
+```{r}
+df <- 7
+x <- 7.6836
+ln_f_x <- log(dchisq(x, df))
+ln_f_x
+```
+normal dist
+cdf
+```{r}
+x <- 0
+pdf <- dnorm(x, mean = 0, sd = 1)
+
+cdf <- pnorm(x, mean = 0, sd = 1)
+# Quantile for p
+p <- 0.95
+quantile <- qnorm(p, mean = 0, sd = 1)
+#random draws
+random_draws <- rnorm(1000, mean = 0, sd = 1)
+```
+
+Chi^2
+chi-squared
+```{r}
+# PDF at x
+df <- 7
+x <- 5
+pdf <- dchisq(x, df)
+
+# CDF at x
+cdf <- pchisq(x, df)
+
+# Quantile for p
+quantile <- qchisq(p, df)
+
+# Random draws
+random_draws <- rchisq(1000, df)
+```
+
+Discrete random vars factorial
+```{r}
+k <- 10
+
+prob <- (factorial(5) * factorial(k - 1)) / factorial(k + 5)
+
+# Log of the probability
+log_prob <- log(prob)
+```
+
+
+p value at x 
+```{r}
+x2 <- 4.0791
+p_value <- 1 - pchisq(x2, df)
+p_value
+```
+
+Integral of PDF over ([a, b]):
+```{r}
+lower <- 8.4568
+upper <- 18.9441
+integral <- integrate(dchisq, lower = lower, upper = upper, df = df)
+integral$value
+```
+
+Quantile for a Given Probability:
+```{r}
+prob <- 0.032
+A <- qchisq(prob, df)
+A
+```
+
+Normal dist:
+
+```{r}
+a <- 2.6
+b <- 3.4
+x <- -1.23
+variance <- b^2
+ln_f_x <- log((1 / sqrt(2 * pi * variance)) * exp(-(x - a)^2 / (2 * variance)))
+ln_f_x
+```
+
+Discrete Random Variables
+log of probability
+```{r}
+k <- 39
+ln_PrX <- log((5 * factorial(5) * factorial(k - 1)) / factorial(k + 5))
+ln_PrX
+```
+
+MLE:
+Log-Likelihood for Exponential Distribution ((lambda)):
+```{r}
+lambda <- 1.3
+xi <- c(0.44, 0.94, 0.16, 1.76, 2.24, 0.22, 0.84)
+log_likelihood <- sum(log(lambda) - lambda * xi)
+log_likelihood
+```
+
+MLE LAMBDA
+```{r}
+lambda_mle <- 1 / mean(xi)
+lambda_mle
+```
+
+Log-Likelihood for Custom (\theta):
+```{r}
+observations <- c(-6.86, -11.81, -13.72, -7.79, -5.24, -9.15)
+
+log_likelihood <- function(theta) {
+  n <- length(observations)
+  sum_term1 <- sum((observations + 10) / theta)
+  sum_term2 <- sum(log(1 + exp(-(observations + 10) / theta)))
+  return(-n * log(theta) - sum_term1 - 2 * sum_term2)
+}
+
+mle_result <- optimize(log_likelihood, interval = c(0.1, 100), maximum = TRUE)
+theta_mle <- mle_result$maximum
+theta_mle
+```
+
+Standard Error of MLE ((\theta)):
+
+```{r}
+log_likelihood_hessian <- function(theta) {
+  n <- length(observations)
+  term1 <- n / theta^2
+  term2 <- sum(2 * (observations + 10) / theta^3)
+  term3 <- sum((observations + 10)^2 * exp(-(observations + 10) / theta) /
+               (theta^3 * (1 + exp(-(observations + 10) / theta))^2))
+  return(-(term1 - term2 + term3))
+}
+
+hessian <- log_likelihood_hessian(theta_mle)
+se <- 1 / sqrt(-hessian)
+se
+```
+OLS
+```{r}
+# OLS Estimation using built-in function
+model <- lm(y ~ x1 + x2, data = your_data)
+
+# Coefficients
+beta_hat <- coef(model)
+
+# Residuals
+residuals <- resid(model)
+
+# Variance-Covariance Matrix of Coefficients
+vcov_matrix <- vcov(model)
+
+# Fitted values
+fitted_values <- fitted(model)
+```
+P value and test statistic t-test tstat
+```{r}
+# t-statistic and p-value
+summary(model)$coefficients[, "t value"]
+summary(model)$coefficients[, "Pr(>|t|)"]
+```
+
+VIF
+```{r}
+library(car)
+vif_values <- vif(model)
+vif_values
+```
+Confidence INterval
+```{r}
+conf_int <- confint(model, level = 0.90)
+conf_int
+```
+
+```{r}
+
+```
+
+Wald Test joint hypothesis 
+```{r}
+library(car)
+
+# Wald test
+linearHypothesis(model, c("beta1 = 0", "beta2 = 0"))
+```
+Clustered Standard Errors and Hypothesis testing
+```{r}
+library(sandwich)
+library(lmtest)
+
+# Clustered standard errors
+clustered_se <- vcovCL(model, cluster = ~cluster_var)
+
+# Wald test with clustered SE
+waldtest(model, vcov = clustered_se)
+```
+
+Logit Model 
+
+```{r}
+# Fit model
+logit_model <- glm(respondi ~ resplast + propresp + weekslast, 
+                   data = charity_data, family = binomial)
+
+# Predicted probabilities
+predicted_probs <- predict(logit_model, type = "response")
+```
+
+Projection and Residual Maker
+```{r}
+# Define matrix X
+X <- matrix(c(1, 1, 1, 1, 1, 2, 3, 4, 5), nrow = 5)
+
+# Projection matrix
+P <- X %*% solve(t(X) %*% X) %*% t(X)
+
+# Residual maker matrix
+M <- diag(nrow(X)) - P
+```
+
+Variance covariance
+```{r}
+# Variance of OLS estimates
+sigma2 <- sum(residuals^2) / (nrow(X) - ncol(X))
+variance_beta <- sigma2 * solve(t(X) %*% X)
+```
+
+Hypothesis testing
+```{r}
+# t-test for single coefficient
+summary(model)$coefficients
+
+# F-test for multiple coefficients
+#analysis of variance
+anova(model)
+```
+Goodness of fit (rsquared)R^2
+```{r}
+# R-squared
+r_squared <- summary(model)$r.squared
+
+# Adjusted R-squared
+adj_r_squared <- summary(model)$adj.r.squared
+```
+Log-liklihood
+```{r}
+# Log-Likelihood
+log_likelihood <- logLik(model)
+
+# AIC and BIC
+aic_value <- AIC(model)
+bic_value <- BIC(model)
+```
+
+MLE
+```{r}
+# Example of custom MLE using optim
+log_likelihood <- function(params) {
+  beta <- params[1:2]
+  sigma2 <- params[3]
+  residuals <- y - X %*% beta
+  ll <- -0.5 * (length(y) * log(2 * pi * sigma2) + sum(residuals^2) / sigma2)
+  return(-ll)  # Negative for minimization
+}
+
+# Initial parameter guesses
+init_params <- c(0, 0, 1)
+
+# Optimization
+optim_results <- optim(par = init_params, fn = log_likelihood, method = "BFGS")
+mle_params <- optim_results$par
+```
+MLE part 2
+```{r}
+# Log-likelihood for linear regression
+log_likelihood_lr <- function(params) {
+  beta <- params[1:length(X[1, ])]
+  sigma2 <- params[length(X[1, ]) + 1]
+  residuals <- y - X %*% beta
+  ll <- -0.5 * (length(y) * log(2 * pi * sigma2) + sum(residuals^2) / sigma2)
+  return(-ll)  # Negative for minimization
+}
+
+# Optimizing
+optim_results_lr <- optim(par = c(rep(0, ncol(X)), 1), fn = log_likelihood_lr, method = "BFGS")
+mle_lr <- optim_results_lr$par
+```
+
+Heteroskedasticity and Robust Standard Errors
+```{r}
+library(sandwich)
+
+# Robust variance-covariance matrix (HC0, HC1, etc.)
+robust_vcov <- vcovHC(model, type = "HC1")
+
+# Robust standard errors
+robust_se <- sqrt(diag(robust_vcov))
+```
+Fixed effects
+```{r}
+library(plm)
+
+# Fixed effects model
+fixed_effects_model <- plm(y ~ x1 + x2, data = panel_data, model = "within")
+
+# Summary
+summary(fixed_effects_model)
+```
+FIxed effects and panel data 
+```{r}
+library(plm)
+
+# Fit fixed effects model
+fixed_effects_model <- plm(lrent_ut ~ lvouch + linc + ltotpop + lvacancy, 
+                           data = panel_data, model = "within")
+
+# Summary
+summary(fixed_effects_model)
+
+# Hypothesis testing
+library(lmtest)
+linearHypothesis(fixed_effects_model, c("lvouch = 0", "linc = 0"))
+```
+
+Structural equation
+```{r}
+library(lavaan)
+
+# Define SEM model
+sem_model <- "
+  y1 ~ x1 + x2
+  y2 ~ y1 + x3
+"
+
+# Fit model
+fit <- sem(sem_model, data = your_data)
+
+# Summary of results
+summary(fit, standardized = TRUE)
+```
+Breusch-Pagan Test (BP test)
+```{r}
+library(lmtest)
+
+# Perform Breusch-Pagan test
+bptest(model)
+```
+White Test
+```{r}
+white_test <- bptest(model, varformula = ~ X1 + I(X1^2), data = your_data)
+```
+Instrumental variables
+```{r}
+library(AER)
+
+# 2SLS (Two-Stage Least Squares)
+iv_model <- ivreg(y ~ x1 + x2 | z1 + z2, data = your_data)
+
+# Summary
+summary(iv_model)
+```
+Monte Carlo
+```{r}
+# Monte Carlo Simulation for OLS
+simulate_ols <- function(n, beta, sigma2) {
+  X <- cbind(1, rnorm(n))  # Intercept and one covariate
+  y <- X %*% beta + rnorm(n, sd = sqrt(sigma2))
+  model <- lm(y ~ X[, 2])
+  return(coef(model))
+}
+
+# Run simulation
+set.seed(123)
+sim_results <- replicate(1000, simulate_ols(100, c(1, 2), 1))
+```
+MOnte Carlo for sample mean: 
+```{r}
+numsamp <- 100000
+muhat_all <- numeric(numsamp)
+for (i in 1:numsamp) {
+  x <- runif(20, min = 5, max = 8.7)
+  muhat_all[i] <- mean(x)
+}
+
+# Mean and Variance of Monte Carlo Estimates
+mean_muhat <- mean(muhat_all)
+var_muhat <- var(muhat_all)
+
+# Kernel density of estimates
+plot(density(muhat_all))
+```
+
+
+
+
+
+
+
+
+Assignment 14:
+
+```{r}
+library(lmtest)
+library(car)
+filepath="/Users/jadenfix/Desktop/Graduate School Materials/Advanced Econometrics 1/charity.RData"
+load(filepath)
+ols1 <- lm(respond ~ resplast + propresp + weekslast, data = data)
+summary(ols1)
+```
+a.)
+Consider the following candidate values of β =(0.16 0.06 0.39 0.00)
+What is the value of the sum of squared errors at these values?
+```{r}
+beta <- c(0.16, 0.06, 0.39, 0.00)
+X <- cbind(1, data$resplast, data$propresp, data$weekslast)
+y_pred <- X %*% beta
+sse <- sum((data$respond - y_pred)^2)
+print(sse)
+```
+b.)
+ What is the value of the R-squared given the values above
+```{r}
+tss <- sum((data$respond - mean(data$respond))^2)
+r_squared <- 1 - (sse / tss)
+r_squared
+```
+c.)
+ Estimate the model with OLS. What is the sum of squared errors with the OLS
+estimates
+```{r}
+sse_ols <- sum(residuals(ols1)^2)
+sse_ols
+```
+d.)
+ What is the OLS estimate for β0
+```{r}
+ß0 <- coef(ols1)[1]
+ß0
+```
+e.)
+ Consider the null hypothesis H0 : β3 = 0. What is the t-statistic associated with
+this null hypothesis, the p-value, and the conclusion from the test using a 1%
+significance level?
+```{r}
+t_test <- summary(ols1)$coefficients["weekslast", c("t value", "Pr(>|t|)")]
+t_test[1]
+t_test[2]
+
+```
+f.)
+ Consider an individual with resplast = 1, propresp = 0.67, weekslast = 51.29.
+Test the hypothesis that this individual will respond with the same probability as
+an individual with resplast = 0, propresp = 0.75, weekslast = 26.14, by testing
+the null hypothesis
+H0 :β0 + β1(1) + β2(0.67) + β3(51.29)
+= β0 + β1(0) + β2(0.75) + β3(26.14
+
+What is the F statistic for this linear hypothesis test? What is the p-value, and
+what is the conclusion from the test at the 1% significance level
+```{r}
+hypothesis <- "resplast - 0.08 * propresp + 25.15 * weekslast = 0"
+f_test <- linearHypothesis(ols1, hypothesis)
+f_stat <- f_test$`F`[2]
+p_value <- f_test$`Pr(>F)`[2]
+f_stat
+p_value
+```
+g.)
+ Conduct a Breush-Pagan test with your model. What is the test statistic from this
+hypothesis test? What do you conclude from this hypothesis test?
+```{r}
+bp_test <- bptest(ols1)
+bp_test
+```
+a.)`r sse`
+b.)`r r_squared`
+c.)`r sse_ols`
+d.)`r ß0`
+e.) The t-statistic for the null hypothesis is `r t_test[1]`. The p-value is `r t_test[2]`. 
+f.) The F statistic for the null hypothesis is `r f_stat`. The p-value is `r p_value`. 
+g.) The test statistic for the Breusch-Pagan test is `r bp_test`.
+
+
+
+
+
+
+Assignment 12:
+
+Load data
+log(PRICE) = β1 + β2 ln(AREA) + β3AspectRatio + ε
+Where AREA = Width × Height and AspectRatio = Width/Height.
+```{r}
+data = read.csv("http://www.stern.nyu.edu/~wgreene/Text/Edition7/TableF4-1.csv")
+print(variable.names(data))
+```
+a.) Report your OLS estimates. State exactly the numerical interpretation for your estimate of β2
+```{r}
+data$AREA <- data$WIDTH * data$HEIGHT
+data$AspectRatio <- data$WIDTH / data$HEIGHT
+ols1 <- lm(log(PRICE) ~ log(AREA) + AspectRatio, data=data)
+ols1summary <- summary(ols1)
+coeffb2 <- ols1summary$coefficients["log(AREA)", "Estimate"]
+print(ols1summary)
+```
+
+b.) Reproduce the least squares standard errors exactly using the vcov command.
+```{r}
+vcov_matrix <- vcov(ols1)
+se_ols1 <- sqrt(diag(vcov_matrix))
+print(se_ols1)
+```
+
+c.) Using the function vcovHC from the sandwich library, re-produce the heteroskedastic robust standard error estimates exactly. (Hint: you need to specify the small sample degrees of freedom adjustment. To match Greene’s HC numbers you need to use “HC0’ ’.)
+```{r}
+library(sandwich)
+robust_se_ols1 <- sqrt(diag(vcovHC(ols1, type = "HC0")))
+print(robust_se_ols1)
+```
+
+d.)Using the function vcovCR from the clubSandwich library, re-produce the cluster
+robust standard error estimates exactly.
+```{r}
+library(clubSandwich)
+library(lmtest)
+clusV <- vcovCR(ols1, cluster = data$PICTURE, type = "CR1S")
+clustered_test <- coeftest(ols1, vcov = clusV)
+print(clustered_test)
+```
+
+e.)Finally, reconstruct the clustered standard errors using the formula from the lecture
+notes
+```{r}
+X <- model.matrix(ols1)
+y <- log(data$PRICE)
+residuals <- residuals(ols1)
+
+XTX <- t(X) %*% X
+XTX_inv <- solve(XTX)
+
+# clustered var-covar matrix
+clusters <- unique(data$PICTURE)
+clustered_matrix <- matrix(0, ncol = ncol(X), nrow = ncol(X))
+
+for (cluster in clusters) {
+  cluster_data <- data[data$PICTURE == cluster, ]
+  X_g <- model.matrix(ols1, data = cluster_data)
+  u_g <- residuals[data$PICTURE == cluster]
+  clustered_matrix <- clustered_matrix + t(X_g) %*% (u_g %*% t(u_g)) %*% X_g
+}
+
+# small sample adjustment
+G <- length(clusters)
+n <- nrow(data)
+k <- ncol(X)
+adjustment <- (G / (G - 1)) * ((n - 1) / (n - k))
+
+manual_clustered_var <- adjustment * XTX_inv %*% clustered_matrix %*% XTX_inv
+
+# se's
+manual_clustered_se <- sqrt(diag(manual_clustered_var))
+print(manual_clustered_se)
+```
+
+
+Assignment 13:
+
+
+a.)
+How many observations are in the data set, and how many variables are in the dataset?
+```{r}
+load("/Users/jadenfix/Desktop/Graduate School Materials/Advanced Econometrics 1/housingvouchers.RData")
+data <- regression_data
+head(data)
+dimdata <- dim(data)
+obervations <- nrow(data)
+print(obervations)
+variablesindata <- ncol(data)
+print(variablesindata)
+```
+b.)
+Column 1 of Table 3 reports averages for certain variables in the data set. What is the average of Evidence of rodents in the data?
+```{r}
+mean_evrod <- mean(data$evrod, na.rm = TRUE)
+mean_evrod
+```
+c.)
+The full sample column in Table 4 reports one of the author’s main analysis. Replicate the results in this column. The left-hand side variable is lrent_ut. You should be able to replicate these results very closely. Read the note in the table to see what additional controls other than the ones listed in the table need to be included in the regression. It says the regression includes individual unit and year fixed effects and unit-specific controls for: evidence of rodents, presence of washer or dryer, large cracks in the wall, and if the sewage system broke down in the last two years. Also the standard errors need to be clustered at the MSA level, which is a lower level of aggregation than the individual unit fixed effects.
+```{r}
+library(fixest)
+fixestreg <- feols(
+  lrent_ut ~ lvouch + linc + ltotpop + lvacancy + evrod + drywash + cracks + ifsew | control + year,
+  cluster = ~smsa,
+  data = data
+)
+summary(fixestreg)
+ltotpop_coeff <- fixestreg$coefficients["ltotpop"]
+ltotpop_se <- fixestreg$se["ltotpop"]
+
+```
+What is the coefficient estimate and standard error for log of MSA population? Is this variable statistically different than zero at the 1% level?
+```{r}
+c <- "It's a log log regression so the coeff of `r ltotpop_coeff` means a 1% increase in ltotpop = a `r ltotpop_coeff` increase in lrent_ut"
+```
+
+d.)
+Copy and paste the 16 words from the abstract that describe the results from this regression (the abstract is the short little description of results under the list of authors)
+```{r}
+answer_d <- "We do not find that an increase in vouchers affected the overall price of rental housing"
+answer_d
+```
+
+e.)
+Everything in Table 4 can be replicated almost exactly, except one of the numbers is very far off from what is reported in the fixest output, which number in the table is that?
+
+```{r}
+answer_e <- "likely the r squared value, fixest does r squared different for fixed effects models"
+answer_e
+```
+f.)
+Conduct a joint hypothesis test that the coefficients on evidence of rodents, large cracks in the wall, and if the sewage system broke down are all jointly insignificant (equal to zero). If you are using linearHypothesis with the fixest output it will default to a chi-squared test (large sample test). What is the chi-squared statistic from this test? Do you reject the null hypothesis at the 10% level?
+```{r}
+library(car)
+
+hypothesis <- c("evrod = 0", "cracks = 0", "ifsew = 0")
+linear_test <- linearHypothesis(fixestreg, hypothesis)
+
+answer_f <- linear_test
+answer_f
+```
+g.)
+In a paragraph, summarize your conclusions from this analysis, make sure to state what the research question is and what the findings are in from your regression in practical terms. Do you think that the assumptions of the linear regression model are satisfied? Comment.
+```{r}
+g_answer <- "The research question is whether an increase in housing vouchers affects rental prices. Regression findings suggest there is no significant effect of vouchers on rental prices. But, we found other characteristics like evidence of rodents, cracks in the wall, and sewage system issues are jointly significant in explaining rent variations at the 5% level.
+Linear regression assumptions: are they satisfied?
+1.)linear yes 
+2.)full rnak of x, yes or the reg would not have converged due to singularities
+3.)mean independence through fixed effects and clustered ses 
+4.)homoskedacity: possibly, we would have to do bp test 
+5.)Normality of dist: possibly, we would have to do shapiro wilk or qq 
+"
+g_answer
+```
+
+
+
+Assignment 9
+
+Choose three explanatory variables for y, and label them x1, x2, and x3. Specifically,
+select these variables such that not including x3 from the regression will produce a large
+change in the standard error for the coefficient estimate for x1.
+```{r}
+load("/Users/jadenfix/Desktop/Graduate School Materials/Advanced Econometrics 1/cornwell.RData")
+df <- data
+variable.names(df)
+df = df[!is.na(df$crmrte),]
+df = df[!is.na(df$polpc),]
+df = df[!is.na(df$density),]
+df = df[!is.na(df$pctymle),]
+print(head(df))
+```
+A.)
+What are the values you chose for x1, x2, and x3
+
+A.) I am using polic/capita, density and % young male x1, x2, and x3
+ols1 <- lm(crmrte ~ polpc + density + pctymle, data = df)
+
+B.)
+Using the lm function, estimate the model that does not include x3, y = β0+β1x1+
+β2x2 + ε. What is your estimate, β1? Interpret your estimate, i.e., explain what
+effect a change in x1 is indicated to have on y.
+```{r}
+ols1 <- lm(crmrte ~ polpc + density, data = df)
+B1 = (ols1$coefficients["polpc"])
+summary(ols1)
+print(B1)
+```
+A 1 unit increase in police per capita is = to a 1.4093786 increase in crime rate holding density constant 
+c.) 
+Using the vcov function, what is the estimate for the variance and standard error
+for the coefficient on x1?
+```{r}
+vcov_ols1 <- vcov(ols1)
+var_x1 <- vcov_ols1["polpc", "polpc"]
+se_x1 <- sqrt(var_x1)
+print(vcov_ols1)
+print(var_x1)
+print(se_x1)
+```
+Variance is 0.03317612
+SE is 0.1821431
+ols1 <- lm(crmrte ~ polpc + density, data = df)
+
+D.) Recalling the formula for the variance of a single parameter
+var(bk) = s^2 / (R^2SSTk)
+
+Calculate these three parts individually for the variance for the coefficient on x1.
+Show that they equal the value you got from Part (c).
+
+Part D.)
+```{r}
+s2 <- sum(residuals(ols1)^2) / (nrow(df) - length(coef(ols1)))
+regression1 <- lm(polpc~density, data=df)
+r2 <- summary(regression1)$r.squared
+SST <- sum((df$polpc - mean(df$polpc))^2)
+var_x1_same <- s2 / ((1-r2)*SST)
+se_x1_same <- sqrt(var_x1_same)
+print(var_x1_same)
+print(se_x1_same)
+```
+They are the same: both are: 0.03317612
+
+E.)
+Now re-estimate the model, but this time include x3, what is the new variance and
+standard error for the coefficient on x1?
+E.)
+```{r}
+ols2 <- lm(crmrte ~ polpc + density + pctymle, data = df)
+vcov_ols2 <- vcov(ols2)
+var_x1_ols2 <- vcov_ols2["polpc", "polpc"]
+se_x1_ols2 <- sqrt(var_x1_ols2)
+print(vcov_ols2)
+print(var_x1_ols2)
+print(se_x1_ols2)
+```
+The SE and Variance are slightly lower
+F.)
+ Calculate the individual parts for the variance of the coefficient on x1 like you did in
+Part (d) except now with the model from Part (e). How did the three components
+change compared to their values in Part (d)? Explain what these changes mean for
+each of the components in the context of the model and the data, i.e., don’t just
+say one is higher than the other, but explain WHY it is higher than the other.
+F.)
+```{r}
+s2_withx3 <- sum(residuals(ols2)^2) / (nrow(df) - length(coef(ols2)))
+print(s2_withx3)
+regression123 <- lm(polpc~density+pctymle, data=df)
+r2_x1_with_x2_x3 <- summary(regression123)$r.squared
+print(r2_x1_with_x2_x3)
+#SST stays the same 
+SST <- sum((df$polpc - mean(df$polpc))^2)
+print(SST)
+var_x1_withx3 <- s2_withx3 / ((1-r2_x1_with_x2_x3)*SST)
+se_x1_withx3 <- sqrt(var_x1_withx3)
+print(var_x1_withx3)
+print(se_x1_withx3)
+```
+F explanation: 
+Residual variance decreased, implying pctymle helps capture additional variability in crmrte
+partial R^2 increased by a little which means more variability is explained 
+SST didnt change 
+Variance of B1 decreased so it made the estimate a bit more accurate, while also increasing partial R^2
+This means it helps increase accuracy without increasing multicolinearity, which implies its beneficial to add to the regression 

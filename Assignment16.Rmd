@@ -1,0 +1,186 @@
+---
+title: "Assignment 16"
+author: "JF"
+date: "2024-12-04"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+library(dplyr)
+library(mvtnorm)
+
+load("/Users/jadenfix/Desktop/Graduate School Materials/Advanced Econometrics 1/standby.RData")
+
+```
+
+A. Data Cleaning
+```{r}
+
+cleaned_data <- data %>%
+  filter(complete.cases(PeterPan, SpaceMtn, HauntedMansion, SplashMtn, WinniePooh)) %>%
+  filter(HR >= 10 & HR <= 20)  # Ensure HR aligns with 24-hour clock for 10AM-8PM
+
+# Count the remaining observations
+n_observations <- nrow(cleaned_data)
+cat("Number of observations:", n_observations, "\n")
+
+```
+
+B.)
+```{r}
+J <- 5  # Number of rides
+total_parameters <- 3 * J  # β, λ, σ for each ride
+cat("Total parameters to estimate:", total_parameters, "\n")
+```
+
+C.)
+```{r}
+# Prepare the data matrix
+Y <- as.matrix(cleaned_data[, c("PeterPan", "SpaceMtn", "HauntedMansion", "SplashMtn", "WinniePooh")])
+J <- 5
+sv = c(apply(Y,2,mean),
+       c(3,5,5),
+       c(3,5,5),
+       log(apply(Y,2,var)))
+library(mvtnorm)
+llfn <- function(parms) {
+  BETA <- matrix(parms[1:J], ncol = 1)
+  LAM <- matrix(parms[(J + 1):(2 * J)], ncol = 1)
+  SIGMA <- diag(parms[(2 * J + 1):(3 * J)]^2)  # Ensure variances are positive
+  
+  # Mean matrix
+  M <- matrix(rep(BETA, nrow(Y)), nrow = nrow(Y), byrow = TRUE)
+  
+  # Covariance matrix
+  V <- LAM %*% t(LAM) + SIGMA
+  
+  # Calculate log-likelihood
+  ll <- sum(dmvnorm(Y, mean = M[1, ], sigma = V, log = TRUE))
+  return(ll)
+}
+
+# Initial parameter guesses
+initial_params <- c(rep(10, J), rep(1, J), rep(1, J))
+
+# Optimization
+ml <- optim(par = initial_params, 
+            fn = function(x) -llfn(x), 
+            method = "BFGS", 
+            hessian = TRUE, 
+            control = list(maxit = 1000))
+
+# Log-likelihood at solution
+m1_ll <- -ml$value
+cat("Log-Likelihood at MLE:", sprintf("%0.4f", m1_ll), "\n")
+```
+
+D.)
+```{r}
+BETA <- ml$par[1:J]
+LAM <- ml$par[(J + 1):(2 * J)]
+SIGMA <- ml$par[(2 * J + 1):(3 * J)]
+
+hessian_matrix <- ml$hessian
+inv_hessian <- solve(hessian_matrix)
+
+lambda_se <- sqrt(diag(inv_hessian)[(J + 1):(2 * J)])
+
+results <- data.frame(
+  Ride = c("PeterPan", "SpaceMtn", "HauntedMansion", "SplashMtn", "WinniePooh"),
+  Lambda = LAM,
+  SE = lambda_se
+)
+print(results)
+```
+The maximum likelihood estimates for lambda are λ_PeterPan = 14.0635,λ_SpaceMtn = 30.5046,λ_HauntedMansion = 13.6119,λ_SplashMtn = 18.8453, λ_WinniePooh = 7.4702. The standard errors are SE(λ_PeterPan) = 0.1817, SE(λ_SpaceMtn) = 0.3344, SE(λ_HauntedMansion) = 0.1478,SE(λ_SplashMtn) = 0.2728,SE(λ_WinniePooh) = 0.1059.
+E.)
+```{r}
+highest_avg_wait <- which.max(BETA)
+cat("Ride with highest average wait time at average crowdedness:", colnames(Y)[highest_avg_wait], "\n")
+cat("Makes sense, heard that ride is cool, ofc people will wait \n")
+```
+
+F.)
+```{r}
+most_affected_crowdedness <- which.max(LAM)
+cat("Ride most affected by crowdedness:", colnames(Y)[most_affected_crowdedness], "\n")
+cat("Makes sense, heard that ride is cool, when things go up the extremes go up even more, or tend to at least \n")
+```
+
+G.)
+```{r}
+most_affected_other_factors <- which.max(SIGMA)
+cat("Ride most affected by other factors:", colnames(Y)[most_affected_other_factors], "\n")
+cat("Makes sense, heard that ride is cool, if crowdedness explains it then other things will too\n")
+
+```
+
+H.)
+```{r}
+# Extract Lambda Estimates and Covariance
+lambda_estimates <- ml$par[(J + 1):(2 * J)]
+ml_vcov <- solve(ml$hessian)
+lambda_cov <- ml_vcov[(J + 1):(2 * J), (J + 1):(2 * J)]  # Subset for lambdas
+#lambda_cov <- inv_hessian[(J + 1):(2 * J), (J + 1):(2 * J)]
+# Construct Constraint Matrix (C)
+C <- matrix(c(
+  1, -1,  0,  0,  0,  # λ1 = λ2
+  0,  1, -1,  0,  0,  # λ2 = λ3
+  0,  0,  1, -1,  0,  # λ3 = λ4
+  0,  0,  0,  1, -1   # λ4 = λ5
+), nrow = J - 1, byrow = TRUE)
+
+# Define Hypothesis Vector (d)
+d <- rep(0, nrow(C))  # Hypothesized differences are zero
+
+# Compute Wald Test Statistic
+wald_statistic <- t(C %*% lambda_estimates - d) %*% 
+                  solve(C %*% lambda_cov %*% t(C)) %*% 
+                  (C %*% lambda_estimates - d)
+wald_statistic <- as.numeric(wald_statistic)
+
+# Degrees of Freedom and P-value
+df <- nrow(C)  # Number of constraints
+p_value <- 1 - pchisq(wald_statistic, df)
+
+# Print Results
+cat("Wald Test Statistic:", wald_statistic, "\n")
+cat("Degrees of Freedom:", df, "\n")
+cat("P-Value:", p_value, "\n")
+
+```
+The wald statistic is 6091.02 and the p-value is 0.000000. We reject the null hypotheis at the 1% level.
+
+I.)
+```{r}
+specific_date <- cleaned_data[cleaned_data$date == "01/19/2016" & cleaned_data$HR == 11, ]
+Y_specific <- as.matrix(specific_date[, c("PeterPan", "SpaceMtn", "HauntedMansion", "SplashMtn", "WinniePooh")])
+
+SIGMA_diag <- diag(SIGMA^2)
+theta_specific <- solve(t(LAM) %*% solve(SIGMA_diag) %*% LAM + diag(1)) %*% 
+                  t(LAM) %*% solve(SIGMA_diag) %*% (t(Y_specific) - BETA)
+cat("Expected value of theta on 2016-01-19 at hour 11:", theta_specific[1], "\n")
+```
+
+J.)
+```{r}
+all_theta <- (cleaned_data[, c("PeterPan", "SpaceMtn", "HauntedMansion", "SplashMtn", "WinniePooh")] - BETA) / LAM
+cleaned_data$PredictedTheta <- rowMeans(all_theta)
+
+most_crowded <- cleaned_data[which.max(cleaned_data$PredictedTheta), ]
+cat("Most crowded date/hour:\n")
+print(most_crowded)
+cat("Not surprising, new years eve makes sense, I guess that place has good fire works\n")
+```
+
+

@@ -1,0 +1,54 @@
+---
+title: "Exam1"
+author: "JF"
+date: "2024-10-23"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Load & Clean
+```{r}
+load("/Users/jadenfix/Desktop/Graduate School Materials/Advanced Econometrics 1/cornwell.RData")
+df <- data
+variable.names(df)
+df = df[!is.na(df$crmrte),]
+#head(df)
+```
+A.) I used police per capita, year and density 
+B.) 
+```{r}
+modelshort <- lm(crmrte ~ polpc + year, data=df)
+summary(modelshort)
+```
+
+```{r}
+print(modelshort$coefficients["polpc"])
+```
+The coefficient polpc is = to 1.224996, implying a 1 unit increase in police per capita is = to a 1.224996 unit increase in crime rate 
+
+C.) 
+```{r}
+modellong <- lm(crmrte ~ polpc + year + density, data=df)
+summary(modellong)
+```
+The coefficient of polpc is 1.4127843, implying a 1 unit increase in police per capita is = to a 1.4127843 increase in crime rate 
+```{r}
+difference = (modelshort$coefficients["polpc"]) - (modellong$coefficients["polpc"])
+print(difference) 
+```
+This is the difference between the 2 ^
+
+D.) 
+```{r}
+int1 <- lm(density ~ polpc + year, data = df)
+summary(int1)
+```
+
+```{r}
+differenceint <- int1$coefficients["polpc"]*modellong$coefficients["density"]
+print(differenceint)
+```
+Above is the difference between the 2^ (consistent with the other one)

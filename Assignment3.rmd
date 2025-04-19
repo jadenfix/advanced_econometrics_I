@@ -1,0 +1,100 @@
+---
+title: 'AE1: Assignment 3'
+author: "Jaden Fix"
+date: "2024-09-30"
+output: html_document
+---
+
+Let's load in our data and make sure it's clean
+
+```{r}
+load("/Users/jadenfix/Desktop/Graduate School Materials/Advanced Econometrics 1/airfare.RData")
+cleanness = any(is.na(data))
+nrows = nrow(data)
+print(paste("Question 1: Number of Rows:",nrows))
+print(paste("FALSE means no N/As:",cleanness))
+```
+
+There are `r nrows` rows
+
+```{r}
+library(dplyr)
+options(scipen=99999)
+```
+
+To Estimate a and b with the data: fare = a + b(passen)
+
+```{r}
+b_passen = cov(data$fare,data$passen)/var(data$passen)
+print(paste("Question 2: coefficient b:",b_passen))
+a_passen = mean(data$fare) - b_passen*mean(data$passen)
+print(paste("Question 2: coefficient a:",a_passen))
+
+```
+
+Question 2: The correct value of a is `r a_passen` and the correct value of b is `r b_passen`
+
+So we have: fare = `r a_passen` + `r b_passen` \* passen
+
+Question 3: Total sum of squares for our y variable?
+
+We need to do: TSS = sum(yi-yhat)\^2
+
+```{r}
+
+prediction <- a_passen + b_passen * data$passen
+TSS = sum((data$fare - mean(data$fare))^2)
+print(paste("TSS:",TSS))
+```
+
+```{r}
+data$fittedfare <- a_passen + b_passen * data$passen
+mean_fitted <- mean(data$fittedfare)
+```
+
+Fitted Value mean is `r mean_fitted`
+
+```{r}
+data$residuals <- data$fare - data$fittedfare
+mean_residuals <- mean(data$residuals)
+```
+
+Mean of prediction errors: `r mean_residuals`
+
+```{r}
+SSE <- sum((data$residuals)^2)
+```
+
+SSE = `r SSE`
+
+```{r}
+Rsquared <- 1-(SSE/TSS)
+```
+
+Fraction of Variance = R\^2 = `r Rsquared`
+
+```{r}
+print(paste( "a:",nrows))
+print(paste( "ba:",a_passen))
+print(paste( "bb:",b_passen))
+print(paste( "c:",TSS))
+print(paste( "d:",mean_fitted))
+print(paste( "e:",mean_residuals))
+print(paste( "f:",SSE))
+print(paste( "g:",Rsquared))
+
+```
+
+a.) `r nrows`
+
+b.) `r a_passen` & `r b_passen`
+
+c.) `r TSS`
+
+d.) `r mean_fitted`
+
+e.) `r mean_residuals`
+
+f.) `r SSE`
+
+g.) `r Rsquared`
