@@ -6,6 +6,10 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Provenance verification checks that the captured source commit is
+          # an ancestor of the published media commit.
+          fetch-depth: 0
       - name: Install narrow coursework dependencies
         run: |
           sudo apt-get update
