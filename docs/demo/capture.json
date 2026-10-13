@@ -1,11 +1,11 @@
 {
   "scope": "Committed historical queue data; one-factor statistical reproduction only",
   "source_commit": "d11fa60c365efd33ed1db034f5542c1bbb3f319f",
+  "post_capture_attestation": "e2992e43a7def3a963edd7f28c72a8a15c639634 changes only checkout history depth; the pinned data, estimator, and renderer blobs are unchanged",
   "source_blobs": {
     "standby.RData": "5aed5a458b93df1c29d322a5ef249c8b632c8408",
     "verified_factor_scores.R": "47afc90c8027108e0616b736d93f9c661c33522b",
-    "scripts/render_factor_demo.py": "fd5a37bbd49916ec457a5b805cb6028186451eb0",
-    ".github/workflows/coursework.yml": "4d4fab9821b13d3bbff58920c77f456ce9cb47ae"
+    "scripts/render_factor_demo.py": "fd5a37bbd49916ec457a5b805cb6028186451eb0"
   },
   "receipt": {
     "rows": "8998",
