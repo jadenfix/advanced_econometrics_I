@@ -441,7 +441,7 @@ Assignment 14:
 ```{r}
 library(lmtest)
 library(car)
-filepath="/Users/jadenfix/Desktop/Graduate School Materials/Advanced Econometrics 1/charity.RData"
+filepath="charity.RData"
 load(filepath)
 ols1 <- lm(respond ~ resplast + propresp + weekslast, data = data)
 summary(ols1)
@@ -608,7 +608,7 @@ Assignment 13:
 a.)
 How many observations are in the data set, and how many variables are in the dataset?
 ```{r}
-load("/Users/jadenfix/Desktop/Graduate School Materials/Advanced Econometrics 1/housingvouchers.RData")
+load("housingvouchers.RData")
 data <- regression_data
 head(data)
 dimdata <- dim(data)
@@ -689,7 +689,7 @@ Choose three explanatory variables for y, and label them x1, x2, and x3. Specifi
 select these variables such that not including x3 from the regression will produce a large
 change in the standard error for the coefficient estimate for x1.
 ```{r}
-load("/Users/jadenfix/Desktop/Graduate School Materials/Advanced Econometrics 1/cornwell.RData")
+load("cornwell.RData")
 df <- data
 variable.names(df)
 df = df[!is.na(df$crmrte),]

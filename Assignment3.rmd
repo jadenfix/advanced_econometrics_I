@@ -8,7 +8,7 @@ output: html_document
 Let's load in our data and make sure it's clean
 
 ```{r}
-load("/Users/jadenfix/Desktop/Graduate School Materials/Advanced Econometrics 1/airfare.RData")
+load("airfare.RData")
 cleanness = any(is.na(data))
 nrows = nrow(data)
 print(paste("Question 1: Number of Rows:",nrows))

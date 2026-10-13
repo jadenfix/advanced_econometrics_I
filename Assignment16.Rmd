@@ -19,7 +19,7 @@ When you click the **Knit** button a document will be generated that includes bo
 library(dplyr)
 library(mvtnorm)
 
-load("/Users/jadenfix/Desktop/Graduate School Materials/Advanced Econometrics 1/standby.RData")
+load("standby.RData")
 
 ```
 
