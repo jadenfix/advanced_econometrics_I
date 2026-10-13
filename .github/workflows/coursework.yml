@@ -1,0 +1,17 @@
+name: Original coursework code
+on: [push, pull_request]
+jobs:
+  assignments:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install narrow coursework dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends r-base-core r-cran-dplyr r-cran-knitr r-cran-mvtnorm
+      - run: Rscript run_assignment.R Assignment3.rmd
+      - run: Rscript run_assignment.R Assignment5.Rmd
+      - run: Rscript run_assignment.R Assignment9.Rmd
+      - run: Rscript run_assignment.R Exam1_DataAnalysis.Rmd
+      - run: Rscript run_assignment.R Assignment16.Rmd

@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 a.)
 ```{r}
-load("/Users/jadenfix/Desktop/Graduate School Materials/Advanced Econometrics 1/housingvouchers.RData")
+load("housingvouchers.RData")
 data <- regression_data
 head(data)
 dimdata <- dim(data)

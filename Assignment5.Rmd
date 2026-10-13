@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-load("/Users/jadenfix/Desktop/Graduate School Materials/Advanced Econometrics 1/apple.RData")
+load("apple.RData")
 head(data)
 ```
 reglbs = β0 + β1(regprc) + β2(age) + β3(ecoprc) + β4(hhsize) + β5(faminc) + ε 

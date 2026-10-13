@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Load & Clean
 ```{r}
-load("/Users/jadenfix/Desktop/Graduate School Materials/Advanced Econometrics 1/cornwell.RData")
+load("cornwell.RData")
 df <- data
 variable.names(df)
 df = df[!is.na(df$crmrte),]
