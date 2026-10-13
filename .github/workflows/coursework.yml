@@ -6,12 +6,33 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Provenance verification checks that the captured source commit is
+          # an ancestor of the published media commit.
+          fetch-depth: 0
       - name: Install narrow coursework dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends r-base-core r-cran-dplyr r-cran-knitr r-cran-mvtnorm
+          sudo apt-get install -y --no-install-recommends r-base-core r-cran-dplyr r-cran-knitr r-cran-mvtnorm ffmpeg fonts-dejavu-core
       - run: Rscript run_assignment.R Assignment3.rmd
       - run: Rscript run_assignment.R Assignment5.Rmd
       - run: Rscript run_assignment.R Assignment9.Rmd
       - run: Rscript run_assignment.R Exam1_DataAnalysis.Rmd
       - run: Rscript run_assignment.R Assignment16.Rmd
+      - name: Verify model-implied factor scores
+        run: Rscript verified_factor_scores.R
+      - name: Render or verify the source-pinned demo
+        run: |
+          if [ -f docs/demo/capture.json ]; then
+            python3 scripts/verify_demo.py
+          else
+            DEMO_SOURCE_SHA="$GITHUB_SHA" python3 scripts/render_factor_demo.py
+          fi
+      - name: Upload workflow receipt and generated demo
+        uses: actions/upload-artifact@v4
+        with:
+          name: verified-factor-demo
+          path: |
+            research-output/factor-score-receipt.csv
+            docs/demo/
+          if-no-files-found: error
