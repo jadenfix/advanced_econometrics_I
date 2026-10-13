@@ -1,0 +1,43 @@
+{
+  "scope": "Committed historical queue data; one-factor statistical reproduction only",
+  "source_commit": "d11fa60c365efd33ed1db034f5542c1bbb3f319f",
+  "source_blobs": {
+    "standby.RData": "5aed5a458b93df1c29d322a5ef249c8b632c8408",
+    "verified_factor_scores.R": "47afc90c8027108e0616b736d93f9c661c33522b",
+    "scripts/render_factor_demo.py": "fd5a37bbd49916ec457a5b805cb6028186451eb0",
+    ".github/workflows/coursework.yml": "4d4fab9821b13d3bbff58920c77f456ce9cb47ae"
+  },
+  "receipt": {
+    "rows": "8998",
+    "convergence": "0",
+    "top_date": "12/31/2017",
+    "top_hour": "14",
+    "posterior_score": "6.324410",
+    "naive_score": "6.903800",
+    "specific_score": "-0.480309",
+    "loading_PeterPan": "14.062688",
+    "wait_PeterPan": "180",
+    "loading_SpaceMtn": "30.504587",
+    "wait_SpaceMtn": "330",
+    "loading_HauntedMansion": "13.611096",
+    "wait_HauntedMansion": "125",
+    "loading_SplashMtn": "18.841462",
+    "wait_SplashMtn": "160",
+    "loading_WinniePooh": "7.470521",
+    "wait_WinniePooh": "75"
+  },
+  "artifacts": {
+    "factor-score-demo.mp4": {
+      "bytes": 150458,
+      "sha256": "5e4181a573685301121e9310c52680daa2380927b601e714fdcda20dfd52e26c"
+    },
+    "factor-score-demo.gif": {
+      "bytes": 375802,
+      "sha256": "10c491f5ce355e18dc578bb8e66bd7cd12f52090cca1b639d506e4ed8142f605"
+    },
+    "factor-score-poster.png": {
+      "bytes": 132600,
+      "sha256": "f115831a2cf37a665d6c747e197e7db4e950dc993ec208a840190f1f776fb9b5"
+    }
+  }
+}
